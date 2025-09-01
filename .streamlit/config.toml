@@ -1,0 +1,27 @@
+[theme]
+# Primary colors
+primaryColor = "#002855"           # Your brand blue
+backgroundColor = "#FFFFFF"        # White background
+secondaryBackgroundColor = "#f8f9fa"  # Light gray for containers
+textColor = "#002855"              # Dark blue text
+
+base = "light"
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = false
+
+[server]
+headless = true
+fileWatcherType = "auto"
+runOnSave = true  
+
+[runner]
+magicEnabled = true
+fastReruns = true
+
+[browser]
+gatherUsageStats = false
+
+[ui]
+hideTopBar = true

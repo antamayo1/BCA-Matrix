@@ -44,7 +44,7 @@ def check_password():
           st.image("logo-spectra-premium.jpg", width=300)
           st.session_state["username"] = st.text_input("Username", key="username_input")
           st.session_state["password"] = st.text_input("Password", type="password", key="password_input")
-          st.button("Login", on_click=password_entered, key="login_button", use_container_width=True)
+          st.button("Login", on_click=password_entered, key="login_button", use_container_width=True, type="primary")
           return False
       elif not st.session_state["authenticated"]:
         return False

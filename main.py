@@ -136,12 +136,11 @@ def getDescripancy(comparison):
           continue
     outliers = []
     for idx, val in enumerate(values):
-      lower = val * 0.9
-      upper = val * 1.1
-      # Compare val's range to all other values
+      lower = min(val * 0.9, val * 1.1)
+      upper = max(val * 0.9, val * 1.1)
       others = [v for i, v in enumerate(values) if i != idx]
       if all(other < lower or other > upper for other in others):
-        outliers.append(cust_names[idx])
+          outliers.append(cust_names[idx])
     if outliers:
         outlier_result[pline] = outliers
 

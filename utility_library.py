@@ -49,7 +49,6 @@ def getPerUnit(row, column, output):
 
 # STANDARD
 def QTY_CALCULATIONS(PRODUCT_LINES, output, DATA, ASSUMPTIONS, volume):
-  print(ASSUMPTIONS)
   total_gross = 0
   for line in PRODUCT_LINES:
     gross = getSumGivenColumn(line, DATA, 'Qty')
@@ -218,9 +217,6 @@ def MARGIN_CALCULATIONS(PRODUCT_LINES, MARGIN_METRICS, output, DATA, DEFAULTS, F
 
 # STANDARD
 def SGA_CALCULATIONS(PRODUCT_LINES, output, ASSUMPTIONS, DEFAULTS, SGA_METRICS, file):
-
-  print(SGA_METRICS)
-
   for metric in SGA_METRICS:
     output.loc[metric, 'All Lines Cumulative'] = 0
   output.loc['SG&A', 'All Lines Cumulative'] = 0

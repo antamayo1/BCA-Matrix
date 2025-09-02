@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import standard
 import numpy as np
+from openai import OpenAI
+
+AI_client = OpenAI(
+  api_key=st.secrets["OPEN_AI_KEY"]
+)
 
 def table_format(x, metric):
   try:
@@ -64,6 +69,121 @@ def getBCAs(files):
     BCA, _, _, _ = standard.getSummary(file)
     st.session_state[customer] = BCA.set_index("Metric")
   return BCAs, list(set(Plines)), list(set(Metrics))
+
+def highlight_negative(val):
+  try:
+      num = float(val.replace('%','').replace('$','').replace(',','').replace('(','-').replace(')',''))
+      color = '#FFECEC' if num < 0 else '#E8F9EE'
+      if num == 0:
+          color = '#FFFCE7'
+  except:
+      color = '#E8F2FC'
+  return f'background-color: {color}'
+
+def outlier_dict_to_table(outlier_dict):
+  if isinstance(outlier_dict, str):
+    return outlier_dict
+  table = "| Product Line | Retailer | Value |\n|--------------|----------|-------|\n"
+  for pline, entries in outlier_dict.items():
+    for entry in entries:
+      for retailer, value in entry.items():
+        table += f"| {pline} | {retailer.strip()} | {value:,.2f} |\n"
+  return table
+
+def getDescripancy(comparison):
+  # outlier_result = {}
+  # customers = list(comparison['Customer'])
+  # for pline in comparison.columns[1:]:
+  #   values = []
+  #   cust_names = []
+  #   for idx, v in enumerate(comparison[pline]):
+  #     if v != '-' and v != '':
+  #       try:
+  #         val = float(str(v).replace('%','').replace(',','').replace('$','').replace('(','-').replace(')',''))
+  #         values.append(val)
+  #         cust_names.append(customers[idx])
+  #       except:
+  #         continue
+  #   if len(values) > 2:
+  #     q1 = np.percentile(values, 25)
+  #     q3 = np.percentile(values, 75)
+  #     iqr = q3 - q1
+  #     lower = q1 - 1.5 * iqr
+  #     upper = q3 + 1.5 * iqr
+  #     outliers = []
+  #     for name, val in zip(cust_names, values):
+  #       if val < lower or val > upper:
+  #         outliers.append({name: val})
+  #     if outliers:
+  #       outlier_result[pline] = outliers
+
+  #     if outlier_result:
+  #       outlier =  str(outlier_result)
+  #     else:
+  #       outlier = "No outliers detected for any product line."
+  outlier_result = {}
+  customers = list(comparison['Customer'])
+  for pline in comparison.columns[1:]:
+    values = []
+    cust_names = []
+    for idx, v in enumerate(comparison[pline]):
+      if v != '-' and v != '':
+        try:
+          val = float(str(v).replace('%','').replace(',','').replace('$','').replace('(','-').replace(')',''))
+          values.append(val)
+          cust_names.append(customers[idx])
+        except:
+          continue
+    outliers = []
+    for idx, val in enumerate(values):
+      lower = val * 0.9
+      upper = val * 1.1
+      # Compare val's range to all other values
+      others = [v for i, v in enumerate(values) if i != idx]
+      if all(other < lower or other > upper for other in others):
+        outliers.append(cust_names[idx])
+    if outliers:
+        outlier_result[pline] = outliers
+
+    if outlier_result:
+      outlier_string = outlier_result
+    else:
+      outlier_string = "No outliers detected for any product line."
+
+      # response = AI_client.chat.completions.create(
+      #   model="gpt-3.5-turbo",
+      #   messages=[
+      #       {
+      #           "role": "system",
+      #           "content": (
+      #               "You are an expert business case analyst specializing in financial impact assessment and strategic decision-making. "
+      #               "You analyze the results of an outlier test and provide insights on potential business implications."
+      #           )
+      #       },
+      #       {
+      #           "role": "user",
+      #           "content": f'''
+      #   You are given a string that is either "No outliers detected for any product line." or a structured data like this:
+      #   {outlier}
+      #   These are the product lines that have outliers, and inside them is the retailer and the value of it being an outlier.
+
+      #   Please output a markdown table for each product line with outliers, using this format:
+
+      #   ### <Product Line>
+      #   | Retailer   | Value   |
+      #   |------------|---------|
+      #   | Amazon     | 123.45  |
+      #   | Amazon 2   | 98.76   |
+
+      #   After the tables, provide a brief executive summary of the business implications. If there are no outliers, simply state "No outliers detected for any product line."
+      #   '''
+      #       }
+      #   ],
+      #   temperature=0.25
+      # )
+  
+
+  return outlier_string
 
 def getFileDetails(files):
     file_details = []
@@ -138,18 +258,16 @@ if check_password():
           except:
             values.append('-')
         comparison[pline] = values
-      def highlight_negative(val):
-        try:
-            num = float(val.replace('%','').replace('$','').replace(',','').replace('(','-').replace(')',''))
-            color = '#FFECEC' if num <= 0 else '#E8F9EE'
-        except:
-            color = '#E8F2FC'
-        return f'background-color: {color}'
 
       styled_df = comparison.set_index('Customer').map(table_format, metric=selectedMetric)
       styled = styled_df.style.map(highlight_negative)
 
       st.dataframe(styled)
+      with st.spinner("Analyzing discrepancies..."):
+        try:
+          st.table(getDescripancy(comparison))
+        except:
+          st.success("No discrepancies found.", icon="✅")
     else:
       st.error("Please upload at least one Excel file to proceed.", icon="❗")
   

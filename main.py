@@ -246,7 +246,7 @@ if check_password():
           plines = pd.DataFrame(Plines, columns=["Product Line/s"])
           st.dataframe(plines, hide_index=True)
       st.subheader("Difference Matrix", anchor=False)
-      selectedMetric = st.selectbox("Select Metric for Comparison", options=Metrics)
+      selectedMetric = st.selectbox("Select Metric for Comparison", options=Metrics, index=Metrics.index("Contribution Margin"))
       comparison = pd.DataFrame(columns=['Customer'])
       comparison['Customer'] = st.session_state.fileDetails["Customer Name"].unique()
       for pline in Plines:

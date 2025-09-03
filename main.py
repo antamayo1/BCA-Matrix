@@ -202,7 +202,7 @@ if check_password():
       st.dataframe(styled)
       descripancy = pd.DataFrame(getDescripancy(comparison))
       st.subheader("Discrepancy Report", anchor=False)
-      st.write("These are the **product lines** with price discrepancies from the fother retailers. Consider the listed retailers to be outliers in certain product lines.")
+      st.write("These are the **product lines** with price discrepancies from the other retailers. Consider the listed retailers to be outliers in certain product lines.")
       if descripancy.empty:
         st.success("No discrepancies found.", icon="✅")
       else:

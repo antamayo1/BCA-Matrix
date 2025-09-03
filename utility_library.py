@@ -122,8 +122,6 @@ def NET_SALES_CALCULATIONS(output, DATA, ASSUMPTIONS, NET_SALES_METRICS, PRODUCT
         output.loc[metric, f'{line} Per Unit'] = getPerUnit(metric, f'{line} Cumulative', output)
     else:
       loss = -1
-      if 'in Lieu' in metric:
-        loss = 1
       for line in PRODUCT_LINES:
         if line in specific_pline or specific_pline == []:
           output.loc[metric, f'{line} Cumulative'] = output.loc['Sales', f'{line} Cumulative'] * DEFAULTS.get(metric) * loss

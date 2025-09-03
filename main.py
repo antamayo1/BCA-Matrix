@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import standard
 import numpy as np
-from openai import OpenAI
+# from openai import OpenAI
 
-AI_client = OpenAI(
-  api_key=st.secrets["OPEN_AI_KEY"]
-)
+# AI_client = OpenAI(
+#   api_key=st.secrets["OPEN_AI_KEY"]
+# )
 
 def table_format(x, metric):
   try:
